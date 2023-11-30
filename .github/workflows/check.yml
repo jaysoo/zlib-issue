@@ -18,14 +18,16 @@ jobs:
         uses: ./.github/actions/setup
         with:
           affected: true
+      - name: Debug
+        run: python -c "import zlib; print(zlib.ZLIB_VERSION)"
       - run: npx nx-cloud start-ci-run
       - name: Run Commands
         uses: ./.github/actions/run-commands-in-parallel
         with:
           parallel-commands-on-agents: |
-            npx nx affected -t build --parallel=3
-            npx nx affected -t lint --parallel=3
-            npx nx affected -t test --parallel=3
+            npx nx affected -t build --parallel=3 --head=HEAD --base=HEAD^
+            npx nx affected -t lint --parallel=3 --head=HEAD --base=HEAD^
+            npx nx affected -t test --parallel=3 --head=HEAD --base=HEAD^
       - run: npx nx-cloud stop-all-agents
         if: ${{ always() }}
 
@@ -41,5 +43,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Setup
         uses: ./.github/actions/setup
+      - name: Debug
+        run: python -c "import zlib; print(zlib.ZLIB_VERSION)"
       - name: Start Nx Agent ${{ matrix.agent }}
         run: npx nx-cloud start-agent

@@ -14,10 +14,10 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version-file: '.nvmrc'
-        cache: 'npm'
+      #   cache: 'npm'
     - name: Install
       shell: bash
-      run: npm ci
+      run: npm i -f
     - name: Derive appropriate SHAs for base and head for `nx affected` commands
       if: ${{ inputs.affected == 'true' }}
       uses: nrwl/nx-set-shas@v3

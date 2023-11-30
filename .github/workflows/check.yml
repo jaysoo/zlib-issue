@@ -1,0 +1,45 @@
+name: Check
+on:
+  pull_request:
+env:
+  NX_CLOUD_DISTRIBUTED_EXECUTION_AGENT_COUNT: 4
+  NX_CLOUD_DISTRIBUTED_EXECUTION: false
+
+jobs:
+  controller:
+    name: Controller
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup
+        uses: ./.github/actions/setup
+        with:
+          affected: true
+      - run: npx nx-cloud start-ci-run
+      - name: Run Commands
+        uses: ./.github/actions/run-commands-in-parallel
+        with:
+          parallel-commands-on-agents: |
+            npx nx affected -t build --parallel=3
+            npx nx affected -t lint --parallel=3
+            npx nx affected -t test --parallel=3
+      - run: npx nx-cloud stop-all-agents
+        if: ${{ always() }}
+
+  agents:
+    name: Agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      matrix:
+        agent: [1, 2, 3, 4]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Start Nx Agent ${{ matrix.agent }}
+        run: npx nx-cloud start-agent

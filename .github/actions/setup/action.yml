@@ -1,0 +1,25 @@
+name: 'Setup'
+description: 'Run basic setup'
+
+inputs:
+  affected:
+    required: false
+    default: false
+    type: boolean
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: Install
+      shell: bash
+      run: npm ci
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      if: ${{ inputs.affected == 'true' }}
+      uses: nrwl/nx-set-shas@v3
+      with:
+        main-branch-name: 'master'
